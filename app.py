@@ -45,7 +45,7 @@ def contacts(id=None):
         phone = request.json.get('phone', None)
 
         if not name:
-            return jsonify({"msg":"name is required"}), 422
+            return jsonify({"msg":"name is required, please"}), 422
 
         if not phone:
             return jsonify({"msg":"phone is required"}), 422
