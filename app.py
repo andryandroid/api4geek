@@ -2,7 +2,7 @@ import os
 from flask import Flask, request, jsonify, render_template
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
-from models import db, Contact
+from models import db, Contact, Usuario
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -32,7 +32,7 @@ def contacts(id=None):
         if id is not None:
             contact = Contact.query.get(id)
             if contact:
-                return jsonify(Contact.serialize()), 200
+                return jsonify(contact.serialize()), 200
             else:
                 return jsonify({"msg":"Contact not found"}), 404
         else:
