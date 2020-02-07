@@ -17,3 +17,32 @@ class Contact(db.Model):
             "name": self.name,
             "phone": self.phone
         }
+
+
+class Usuario(db.Model):
+    __tablename__ = 'usuario'
+    id = db.Column ( db.Integer, primary_key=True)
+    nombre = db.Column ( db.String(50), nullable = False)
+    apellido = db.Column ( db.String(50),nullable=False)
+    correo = db.Column ( db.String(50),nullable=False)
+    ubicacion = db.Column (db.String(50))
+    descripcion = db.Column (db.String(200))
+    contrasena = db.Column (db.String(50), nullable=False)
+    nombre_usuario = db.Column (db.String(50), nullable=False)
+    imagen_perfil = db.Column (db.String(100))
+
+    def __repr__(self):
+        return "<Usuario %r>" % self.nombre_usuario
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "nombre": self.nombre,
+            "apellido": self.apellido,
+            "correo": self.correo,
+            "ubicacion": self.ubicacion,
+            "descripcion": self.descripcion,
+            "contrasena": self.contrasena,
+            "nombre_usuario": self.nombre_usuario,
+            "imagen_perfil": self.imagen_perfil
+        }
