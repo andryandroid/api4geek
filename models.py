@@ -47,6 +47,27 @@ class Usuario(db.Model):
             "imagen_perfil": self.imagen_perfil
         }
 
+class Evento_Requerimiento(db.Model):
+    __tablename__ = 'evento_requerimiento'
+    evento_id = db.Column(db.Integer, db.ForeignKey('evento.id'), primary_key=True)
+    requerimiento_id = db.Column(db.Integer, db.ForeignKey('requerimiento.id'), primary_key=True)
+    cantidad_requerida = db.Column ( db.Integer, nullable = False)
+    cantidad_actual = db.Column ( db.Integer, nullable = False)
+    estado_requerimiento = db.Column (db.String(50))
+    requerimiento = db.relationship("Requerimiento")
+        
+    def __repr__(self):
+        return "<Evento_Requerimiento %r>" % self.cantidad_requerida
+
+    def serialize(self):
+        return {
+            "evento_id": self.evento_id,
+            "requerimiento_id": self.requerimiento_id,
+            "cantidad_requerida": self.cantidad_requerida,
+            "cantidad_actual": self.cantidad_actual, 
+            "estado_requerimiento": self.estado_requerimiento
+        }
+
 class Evento(db.Model):
     __tablename__ = 'evento'
     id = db.Column ( db.Integer, primary_key=True)
@@ -85,25 +106,4 @@ class Requerimiento(db.Model):
             "id": self.id,
             "nombre": self.nombre,
             "descripcion": self.descripcion          
-        }
-
-class Evento_Requerimiento(db.Model):
-    __tablename__ = 'evento_requerimiento'
-    evento_id = db.Column(db.Integer, db.ForeignKey('evento.id'), primary_key=True)
-    requerimiento_id = db.Column(db.Integer, db.ForeignKey('requerimiento.id'), primary_key=True)
-    cantidad_requerida = db.Column ( db.Integer, nullable = False)
-    cantidad_actual = db.Column ( db.Integer, nullable = False)
-    estado_requerimiento = db.Column (db.String(50))
-    requerimiento = db.relationship("Requerimiento")
-        
-    def __repr__(self):
-        return "<Evento_Requerimiento %r>" % self.cantidad_requerida
-
-    def serialize(self):
-        return {
-            "evento_id": self.evento_id,
-            "requerimiento_id": self.requerimiento_id,
-            "cantidad_requerida": self.cantidad_requerida,
-            "cantidad_actual": self.cantidad_actual, 
-            "estado_requerimiento": self.estado_requerimiento
         }
