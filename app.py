@@ -2,7 +2,7 @@ import os
 from flask import Flask, request, jsonify, render_template
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
-from models import db, Contact, Usuario
+from models import db, Contact, Usuario, Evento
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -130,20 +130,11 @@ def usuario(id=None):
         if not correo:
             return jsonify({"msg":"email is required"}), 422
 
-        if not ubicacion:
-            return jsonify({"msg":"location is required"}), 422
-
-        if not descripcion:
-            return jsonify({"msg":"description is required"}), 422
-
         if not contrasena:
             return jsonify({"msg":"password is required"}), 422
 
         if not nombre_usuario:
             return jsonify({"msg":"user name is required"}), 422    
-        
-        if not imagen_perfil:
-            return jsonify({"msg":"profile image is required"}), 422
 
         usuario = Usuario()
         usuario.nombre = nombre

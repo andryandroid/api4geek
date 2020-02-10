@@ -31,7 +31,6 @@ class Usuario(db.Model):
     nombre_usuario = db.Column (db.String(50), nullable=False)
     imagen_perfil = db.Column (db.String(100))
         
-
     def __repr__(self):
         return "<Usuario %r>" % self.nombre_usuario
 
@@ -48,16 +47,39 @@ class Usuario(db.Model):
             "imagen_perfil": self.imagen_perfil
         }
 
+class Requerimiento(db.Model):
+    __tablename__ = 'requerimiento'
+    evento_id = db.Column(db.Integer, db.ForeignKey('evento.id'), primary_key=True)
+    items_id = db.Column(db.Integer, db.ForeignKey('items.id'), primary_key=True)
+    cantidad_requerida = db.Column ( db.Integer, nullable = False)
+    cantidad_actual = db.Column ( db.Integer, nullable = False)
+    requerimiento = db.Column (db.String(50))
+    items = db.relationship("Items")
+        
+    def __repr__(self):
+        return "<Requerimiento %r>" % self.cantidad_requerida
+
+    def serialize(self):
+        return {
+            "evento_id": self.evento_id,
+            "item_id": self.item_id,
+            "cantidad_requerida": self.cantidad_requerida,
+            "cantidad_actual": self.cantidad_actual, 
+            "requerimiento": self.requerimientos
+        }
+
 class Evento(db.Model):
     __tablename__ = 'evento'
     id = db.Column ( db.Integer, primary_key=True)
     titulo = db.Column ( db.String(50), nullable = False)
-    descripcion = db.Column ( db.String(50),nullable=False)
+    descripcion = db.Column ( db.String(200),nullable=False)
     fecha_limite = db.Column ( db.String(50),nullable=False)
     estado_evento = db.Column (db.String(50))
     imagen = db.Relationship("Imagen", uselist=False, back_populates="evento")
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))
+    usuario = db.relationship("Usuario")
+    requerimientos = db.relationship("Evento_Requerimiento")  
    
-
     def __repr__(self):
         return "<Evento %r>" % self.titulo
 
@@ -68,19 +90,17 @@ class Evento(db.Model):
             "descripcion": self.descripcion,
             "fecha_limite": self.fecha_limite,
             "estado_evento": self.estado_evento,
-            "usuario_id": self.usuario_id,
-
+            "usuario_id": self.usuario_id
         }
 
-class Requerimiento(db.Model):
-    __tablename__ = 'requerimiento'
+class Item(db.Model):
+    __tablename__ = 'item'
     id = db.Column ( db.Integer, primary_key=True)
     nombre = db.Column ( db.String(50), nullable = False)
     descripcion = db.Column ( db.String(50),nullable=False)
       
-
     def __repr__(self):
-        return "<Requerimiento %r>" % self.nombre
+        return "<Item %r>" % self.nombre
 
     def serialize(self):
         return {
@@ -108,17 +128,20 @@ class Imagen(db.Model):
             "id de evento": self.evento_id,
         }
 
-class Participantes(db.Model):
-    __tablename__ = 'Participantes'
+class Participante(db.Model):
+    __tablename__ = 'Participante'
     id = db.Column ( db.Integer, primary_key=True)
-    requerimiento_id = db.Column ( db.Integer, db.ForeignKey(requerimiento.id), primary_key=True)
+    item = db.relationship("Item", back_populates="item")
+    evento = db.relationship("Evento", back_populates="evento")
+    usuario = db.relationship("Usuario", back_populates="usuario")
+    item_id = db.Column ( db.Integer, db.ForeignKey(items.id), primary_key=True)
     evento_id = db.Column ( db.Integer, db.ForeignKey(evento.id), primary_key=True)
     usuario_id = db.Column ( db.Integer, db.ForeignKey(usuario.id), primary_key=True)
     cantidad_Aportada = db.Column ( db.Integer,nullable=False)
-    
+
 
     def __repr__(self):
-        return "<Participantes %r>" % self.cantidad_Aportada
+        return "<Participante %r>" % self.cantidad_Aportada
 
     def serialize(self):
         return {
@@ -126,5 +149,5 @@ class Participantes(db.Model):
             "cantidad aportada": self.cantidad_Aportada,
             "id de evento": self.evento_id,
             "id de usuario": self.usuario_id,
-            "id de requerimiento": self.requerimiento_id,
+            "id de item": self.item_id,
         }
