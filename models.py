@@ -136,7 +136,7 @@ class Participante(db.Model):
     item = db.relationship("Item", back_populates="item")
     evento = db.relationship("Evento", back_populates="evento")
     usuario = db.relationship("Usuario", back_populates="usuario")
-    item_id = db.Column ( db.Integer, db.ForeignKey(items.id), primary_key=True)
+    item_id = db.Column ( db.Integer, db.ForeignKey(item.id), primary_key=True)
     evento_id = db.Column ( db.Integer, db.ForeignKey(evento.id), primary_key=True)
     usuario_id = db.Column ( db.Integer, db.ForeignKey(usuario.id), primary_key=True)
     cantidad_Aportada = db.Column ( db.Integer,nullable=False)
