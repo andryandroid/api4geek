@@ -54,7 +54,8 @@ class Evento(db.Model):
     titulo = db.Column ( db.String(50), nullable = False)
     descripcion = db.Column ( db.String(50),nullable=False)
     fecha_limite = db.Column ( db.String(50),nullable=False)
-    estado_evento = db.Column (db.String(50))   
+    estado_evento = db.Column (db.String(50))
+    imagen = db.Relationship("Imagen", uselist=False, back_populates="evento")
    
 
     def __repr__(self):
@@ -92,8 +93,8 @@ class Requerimiento(db.Model):
 class Imagen(db.Model):
     __tablename__ = 'imagen'
     id = db.Column ( db.Integer, primary_key=True)
-    evento = db.Column ( db.String(50), db.Relationship(Evento))
-    evento_id = db.Column ( db.String(50), db.ForeignKey(evento.id))
+    evento = db.Relationship("Evento", back_populates="imagen")
+    evento_id = db.Column ( db.Integer, db.ForeignKey(evento.id))
     imagen_Evento = db.Column ( db.String(250),nullable=False)
      
 
@@ -104,19 +105,17 @@ class Imagen(db.Model):
         return {
             "id": self.id,
             "imagen de evento": self.imagen_Evento,
+            "id de evento": self.evento_id,
         }
 
 class Participantes(db.Model):
     __tablename__ = 'Participantes'
     id = db.Column ( db.Integer, primary_key=True)
-    requerimiento = db.Column ( db.String(50), db.Relationship(Requerimiento))
-    requerimiento_id = db.Column ( db.String(50), db.ForeignKey(requerimiento.id))
-    evento = db.Column ( db.String(50), db.Relationship(Evento))
-    evento_id = db.Column ( db.String(50), db.ForeignKey(evento.id))
-    usuario = db.Column ( db.String(50), db.Relationship(Usuario))
-    usuario_id = db.Column ( db.String(50), db.ForeignKey(usuario.id))
+    requerimiento_id = db.Column ( db.Integer, db.ForeignKey(requerimiento.id), primary_key=True)
+    evento_id = db.Column ( db.Integer, db.ForeignKey(evento.id), primary_key=True)
+    usuario_id = db.Column ( db.Integer, db.ForeignKey(usuario.id), primary_key=True)
     cantidad_Aportada = db.Column ( db.Integer,nullable=False)
-     
+    
 
     def __repr__(self):
         return "<Participantes %r>" % self.cantidad_Aportada
@@ -125,4 +124,7 @@ class Participantes(db.Model):
         return {
             "id": self.id,
             "cantidad aportada": self.cantidad_Aportada,
+            "id de evento": self.evento_id,
+            "id de usuario": self.usuario_id,
+            "id de requerimiento": self.requerimiento_id,
         }
