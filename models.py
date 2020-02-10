@@ -88,3 +88,41 @@ class Requerimiento(db.Model):
             "descripcion": self.descripcion,          
 
         }
+
+class Imagen(db.Model):
+    __tablename__ = 'imagen'
+    id = db.Column ( db.Integer, primary_key=True)
+    evento = db.Column ( db.String(50), db.Relationship(Evento))
+    evento_id = db.Column ( db.String(50), db.ForeignKey(evento.id))
+    imagen_Evento = db.Column ( db.String(250),nullable=False)
+     
+
+    def __repr__(self):
+        return "<Imagen %r>" % self.imagen_Evento
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "imagen de evento": self.imagen_Evento,
+        }
+
+class Participantes(db.Model):
+    __tablename__ = 'Participantes'
+    id = db.Column ( db.Integer, primary_key=True)
+    requerimiento = db.Column ( db.String(50), db.Relationship(Requerimiento))
+    requerimiento_id = db.Column ( db.String(50), db.ForeignKey(requerimiento.id))
+    evento = db.Column ( db.String(50), db.Relationship(Evento))
+    evento_id = db.Column ( db.String(50), db.ForeignKey(evento.id))
+    usuario = db.Column ( db.String(50), db.Relationship(Usuario))
+    usuario_id = db.Column ( db.String(50), db.ForeignKey(usuario.id))
+    cantidad_Aportada = db.Column ( db.Integer,nullable=False)
+     
+
+    def __repr__(self):
+        return "<Participantes %r>" % self.cantidad_Aportada
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "cantidad aportada": self.cantidad_Aportada,
+        }
