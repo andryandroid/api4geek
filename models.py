@@ -30,6 +30,7 @@ class Usuario(db.Model):
     contrasena = db.Column (db.String(50), nullable=False)
     nombre_usuario = db.Column (db.String(50), nullable=False)
     imagen_perfil = db.Column (db.String(100))
+    requerimiento = db.relationship("Association", back_populates="requerimiento")
         
     def __repr__(self):
         return "<Usuario %r>" % self.nombre_usuario
@@ -50,11 +51,12 @@ class Usuario(db.Model):
 class Requerimiento(db.Model):
     __tablename__ = 'requerimiento'
     evento_id = db.Column(db.Integer, db.ForeignKey('evento.id'), primary_key=True)
-    items_id = db.Column(db.Integer, db.ForeignKey('items.id'), primary_key=True)
+    item_id = db.Column(db.Integer, db.ForeignKey('item.id'), primary_key=True)
     cantidad_requerida = db.Column ( db.Integer, nullable = False)
     cantidad_actual = db.Column ( db.Integer, nullable = False)
-    requerimiento = db.Column (db.String(50))
-    items = db.relationship("Items")
+    estado_requerimiento = db.Column (db.String(50))
+    item = db.relationship("Item")
+    usuario = db.relationship("Association", back_populates="usario")
         
     def __repr__(self):
         return "<Requerimiento %r>" % self.cantidad_requerida
@@ -65,7 +67,7 @@ class Requerimiento(db.Model):
             "item_id": self.item_id,
             "cantidad_requerida": self.cantidad_requerida,
             "cantidad_actual": self.cantidad_actual, 
-            "requerimiento": self.requerimientos
+            "estado del requerimiento": self.estado_requerimientos
         }
 
 class Evento(db.Model):
