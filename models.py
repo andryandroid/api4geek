@@ -50,11 +50,11 @@ class Usuario(db.Model):
 class Evento_Requerimiento(db.Model):
     __tablename__ = 'evento_requerimiento'
     evento_id = db.Column(db.Integer, db.ForeignKey('evento.id'), primary_key=True)
-    requerimiento_id = db.Column(db.Integer, db.ForeignKey('requerimiento.id'), primary_key=True)
+    item_id = db.Column(db.Integer, db.ForeignKey('item.id'), primary_key=True)
     cantidad_requerida = db.Column ( db.Integer, nullable = False)
     cantidad_actual = db.Column ( db.Integer, nullable = False)
     estado_requerimiento = db.Column (db.String(50))
-    requerimiento = db.relationship("Requerimiento")
+    requerimiento = db.relationship("Item")
         
     def __repr__(self):
         return "<Evento_Requerimiento %r>" % self.cantidad_requerida
@@ -62,7 +62,7 @@ class Evento_Requerimiento(db.Model):
     def serialize(self):
         return {
             "evento_id": self.evento_id,
-            "requerimiento_id": self.requerimiento_id,
+            "item_id": self.item_id,
             "cantidad_requerida": self.cantidad_requerida,
             "cantidad_actual": self.cantidad_actual, 
             "estado_requerimiento": self.estado_requerimiento
@@ -77,7 +77,7 @@ class Evento(db.Model):
     estado_evento = db.Column (db.String(50))
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))
     usuario = db.relationship("Usuario")
-    requerimientos = db.relationship("Evento_Requerimiento")  
+    items = db.relationship("Evento_Requerimiento")  
    
     def __repr__(self):
         return "<Evento %r>" % self.titulo
@@ -99,7 +99,8 @@ class Requerimiento(db.Model):
     descripcion = db.Column ( db.String(50),nullable=False)
       
     def __repr__(self):
-        return "<Requerimiento %r>" % self.nombre
+        return "<Requerimiento %r>" % self.nombreñ´}
+
 
     def serialize(self):
         return {
