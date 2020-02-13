@@ -19,10 +19,9 @@ Migrate(app, db)
 manager = Manager(app)
 manager.add_command("db", MigrateCommand)
 
-
-
 @app.route("/")
 def home():
+    
     return render_template("index.html")
 
 @app.route("/contacts", methods=['GET', 'POST'])
@@ -152,7 +151,6 @@ def usuario(id=None):
 
         return jsonify(usuario.serialize()), 201
 
-
     if request.method == 'PUT':
         nombre = request.json.get('nombre', None)
         apellido = request.json.get('apellido', None)
@@ -172,20 +170,11 @@ def usuario(id=None):
         if not correo:
             return jsonify({"msg":"email is required"}), 422
 
-        if not ubicacion:
-            return jsonify({"msg":"location is required"}), 422
-
-        if not descripcion:
-            return jsonify({"msg":"description is required"}), 422
-
         if not contrasena:
             return jsonify({"msg":"password is required"}), 422
 
         if not nombre_usuario:
-            return jsonify({"msg":"user name is required"}), 422    
-        
-        if not imagen_perfil:
-            return jsonify({"msg":"profile image is required"}), 422
+            return jsonify({"msg":"user name is required"}), 422
 
         usuario = Usuario.query.get(id)
 
@@ -217,136 +206,236 @@ def usuario(id=None):
 
         return jsonify({"msg":"User deleted"}), 200
 
-@app.route("/evento", methods=['GET', 'POST'])
-@app.route("/evento/<int:id>", methods=['GET', 'PUT', 'DELETE'])
-def evento(id=None):
-    if request.method == 'GET':
-        if id is not None:
-            evento = Evento.query.get(id)
-            if evento:
-                return jsonify(evento.serialize()), 200
-            else:
-                return jsonify({"msg":"Evento not found"}), 404
-        else:
-            evento = Evento.query.all()
-            evento = list(map(lambda evento: evento.serialize(), evento))
-            return jsonify(evento), 200
-    if request.method == 'POST':
-        titulo = request.json.get('titulo', None)
-        descripcion = request.json.get('descripcion', None)
-        fecha_limite = request.json.get('fecha_limite', None)
-        estado_evento = request.json.get('estado_evento', None)
-        usuario_id = request.json.get('usuario_id', None)
-        if not titulo:
-            return jsonify({"msg":"title is required"}), 422
-        if not descripcion:
-            return jsonify({"msg":"description is required"}), 422
-        if not fecha_limite:
-            return jsonify({"msg":"deadline is required"}), 422
-        if not estado_evento:
-            return jsonify({"msg":"event status is required"}), 422    
+# @app.route("/evento", methods=['GET', 'POST'])
+# @app.route("/evento/<int:id>", methods=['GET', 'PUT', 'DELETE'])
+# def evento(id=None):
+#     if request.method == 'GET':
+#         if id is not None:
+#             evento = Evento.query.get(id)
+#             if evento:
+#                 return jsonify(evento.serialize()), 200
+#             else:
+#                 return jsonify({"msg":"Evento not found"}), 404
+#         else:
+#             evento = Evento.query.all()
+#             evento = list(map(lambda evento: evento.serialize(), evento))
+#             return jsonify(evento), 200
+#     if request.method == 'POST':
+#         titulo = request.json.get('titulo', None)
+#         descripcion = request.json.get('descripcion', None)
+#         fecha_limite = request.json.get('fecha_limite', None)
+#         estado_evento = request.json.get('estado_evento', None)
+#         usuario_id = request.json.get('usuario_id', None)
+#         if not titulo:
+#             return jsonify({"msg":"title is required"}), 422
+#         if not descripcion:
+#             return jsonify({"msg":"description is required"}), 422
+#         if not fecha_limite:
+#             return jsonify({"msg":"deadline is required"}), 422
+#         if not estado_evento:
+#             return jsonify({"msg":"event status is required"}), 422    
         
-        if not usuario_id:
-            return jsonify({"msg":"user id is required"}), 422
+#         if not usuario_id:
+#             return jsonify({"msg":"user id is required"}), 422
          
-        evento = Evento()
-        evento.titulo = titulo
-        evento.descripcion = descripcion
-        evento.fecha_limite = fecha_limite
-        evento.estado_evento = estado_evento
-        evento.usuario_id = usuario_id
-        db.session.add(evento)
-        db.session.commit()
-        return jsonify(evento.serialize()), 201
-    if request.method == 'PUT':
-        titulo = request.json.get('titulo', None)
-        descripcion = request.json.get('descripcion', None)
-        fecha_limite = request.json.get('fecha_limite', None)
-        estado_evento = request.json.get('estado_evento', None)
-        usuario_id = request.json.get('usuario_id', None)
-        if not titulo:
-            return jsonify({"msg":"title is required"}), 422
-        if not descripcion:
-            return jsonify({"msg":"description is required"}), 422
-        if not fecha_limite:
-            return jsonify({"msg":"deadline is required"}), 422
-        if not estado_evento:
-            return jsonify({"msg":"event status is required"}), 422    
+#         evento = Evento()
+#         evento.titulo = titulo
+#         evento.descripcion = descripcion
+#         evento.fecha_limite = fecha_limite
+#         evento.estado_evento = estado_evento
+#         evento.usuario_id = usuario_id
+#         db.session.add(evento)
+#         db.session.commit()
+#         return jsonify(evento.serialize()), 201
+#     if request.method == 'PUT':
+#         titulo = request.json.get('titulo', None)
+#         descripcion = request.json.get('descripcion', None)
+#         fecha_limite = request.json.get('fecha_limite', None)
+#         estado_evento = request.json.get('estado_evento', None)
+#         usuario_id = request.json.get('usuario_id', None)
+#         if not titulo:
+#             return jsonify({"msg":"title is required"}), 422
+#         if not descripcion:
+#             return jsonify({"msg":"description is required"}), 422
+#         if not fecha_limite:
+#             return jsonify({"msg":"deadline is required"}), 422
+#         if not estado_evento:
+#             return jsonify({"msg":"event status is required"}), 422    
         
-        if not usuario_id:
-            return jsonify({"msg":"user id is required"}), 422
-        evento = Evento.query.get(id)
-        if not evento:
-                return jsonify({"msg":"Evento not found"}), 404
-        evento.titulo = titulo
-        evento.descripcion = descripcion
-        evento.fecha_limite = fecha_limite
-        evento.estado_evento = estado_evento
-        evento.usuario_id = usuario_id
-        db.session.commit()
-        return jsonify(evento.serialize()), 200
-    if request.method == 'DELETE':
-        evento = Evento.query.get(id)
-        if not evento:
-                return jsonify({"msg":"Evento not found"}), 404
-        db.session.delete(evento)
-        db.session.commit()
-        return jsonify({"msg":"Evento deleted"}), 200
-@app.route("/item", methods=['GET', 'POST'])
-@app.route("/item/<int:id>", methods=['GET', 'PUT', 'DELETE'])
-def item(id=None):
-    if request.method == 'GET':
-        if id is not None:
-            item = Item.query.get(id)
-            if item:
-                return jsonify(item.serialize()), 200
-            else:
-                return jsonify({"msg":"item not found"}), 404
-        else:
-            item = Item.query.all()
-            item = list(map(lambda item: item.serialize(), item))
-            return jsonify(item), 200
-    if request.method == 'POST':
-        nombre = request.json.get('nombre', None)
-        descripcion = request.json.get('descripcion', None)
+#         if not usuario_id:
+#             return jsonify({"msg":"user id is required"}), 422
+#         evento = Evento.query.get(id)
+#         if not evento:
+#                 return jsonify({"msg":"Evento not found"}), 404
+#         evento.titulo = titulo
+#         evento.descripcion = descripcion
+#         evento.fecha_limite = fecha_limite
+#         evento.estado_evento = estado_evento
+#         evento.usuario_id = usuario_id
+#         db.session.commit()
+#         return jsonify(evento.serialize()), 200
+#     if request.method == 'DELETE':
+#         evento = Evento.query.get(id)
+#         if not evento:
+#                 return jsonify({"msg":"Evento not found"}), 404
+#         db.session.delete(evento)
+#         db.session.commit()
+#         return jsonify({"msg":"Evento deleted"}), 200
+# @app.route("/item", methods=['GET', 'POST'])
+# @app.route("/item/<int:id>", methods=['GET', 'PUT', 'DELETE'])
+# def item(id=None):
+#     if request.method == 'GET':
+#         if id is not None:
+#             item = Item.query.get(id)
+#             if item:
+#                 return jsonify(item.serialize()), 200
+#             else:
+#                 return jsonify({"msg":"item not found"}), 404
+#         else:
+#             item = Item.query.all()
+#             item = list(map(lambda item: item.serialize(), item))
+#             return jsonify(item), 200
+#     if request.method == 'POST':
+#         nombre = request.json.get('nombre', None)
+#         descripcion = request.json.get('descripcion', None)
        
-        if not nombre:
-            return jsonify({"msg":"name is required"}), 422
-        if not descripcion:
-            return jsonify({"msg":"description is required"}), 422
+#         if not nombre:
+#             return jsonify({"msg":"name is required"}), 422
+#         if not descripcion:
+#             return jsonify({"msg":"description is required"}), 422
          
-        item = Item()
-        item.nombre = nombre
-        item.descripcion = descripcion
+#         item = Item()
+#         item.nombre = nombre
+#         item.descripcion = descripcion
         
-        db.session.add(item)
-        db.session.commit()
-        return jsonify(item.serialize()), 201
-    if request.method == 'PUT':
-        nombre = request.json.get('nombre', None)
-        descripcion = request.json.get('descripcion', None)
+#         db.session.add(item)
+#         db.session.commit()
+#         return jsonify(item.serialize()), 201
+#     if request.method == 'PUT':
+#         nombre = request.json.get('nombre', None)
+#         descripcion = request.json.get('descripcion', None)
      
-        if not nombre:
-            return jsonify({"msg":"name is required"}), 422
-        if not descripcion:
-            return jsonify({"msg":"description is required"}), 422
+#         if not nombre:
+#             return jsonify({"msg":"name is required"}), 422
+#         if not descripcion:
+#             return jsonify({"msg":"description is required"}), 422
         
-        item = Item.query.get(id)
-        if not item:
-                return jsonify({"msg":"item not found"}), 404
-        item.nombre = nombre
-        item.descripcion = descripcion
+#         item = Item.query.get(id)
+#         if not item:
+#                 return jsonify({"msg":"item not found"}), 404
+#         item.nombre = nombre
+#         item.descripcion = descripcion
         
-        db.session.commit()
-        return jsonify(item.serialize()), 200
-    if request.method == 'DELETE':
-        item = Item.query.get(id)
-        if not item:
-                return jsonify({"msg":"item not found"}), 404
-        db.session.delete(item)
-        db.session.commit()
-        return jsonify({"msg":"item deleted"}), 200
+#         db.session.commit()
+#         return jsonify(item.serialize()), 200
+#     if request.method == 'DELETE':
+#         item = Item.query.get(id)
+#         if not item:
+#                 return jsonify({"msg":"item not found"}), 404
+#         db.session.delete(item)
+#         db.session.commit()
+#         return jsonify({"msg":"item deleted"}), 200
 
+
+# @app.route("/requerimiento", methods=['GET', 'POST'])
+# @app.route("/requerimiento/<int:id_evento>/<int:id_item>", methods=['GET', 'PUT', 'DELETE'])
+
+# def requerimiento(id_evento=None, id_item = None):
+#     if request.method == 'GET':
+#         if id_evento is not None and id_item is not None:
+#             requerimiento = Requerimiento.query.get(( id_evento , id_item ))
+#             if requerimiento:
+#                 return jsonify(requerimiento.serialize()), 200
+#             else:
+#                 return jsonify({"msg":"Requerimiento not found"}), 404
+#         else:
+#             requerimiento = Requerimiento.query.all()
+#             requerimiento = list(map(lambda requerimiento: requerimiento.serialize(), requerimiento))
+#             return jsonify(requerimiento), 200
+
+#     if request.method == 'POST':
+#         evento_id = request.json.get('evento_id', None)
+#         item_id = request.json.get('item_id', None)
+#         cantidad_requerida = request.json.get('cantidad_requerida', None)
+#         cantidad_actual = request.json.get('cantidad_actual', None)
+#         estado_requerimiento = request.json.get('estado_requerimiento', None)
+
+#         if not evento_id:
+#             return jsonify({"msg":"evento_id is required"}), 422
+
+#         if not item_id:
+#             return jsonify({"msg":"item_id is required"}), 422
+
+#         if not cantidad_requerida:
+#             return jsonify({"msg":"cantidad requerida is required"}), 422
+
+#         if not cantidad_actual:
+#             return jsonify({"msg":"cantidad actual is required"}), 422
+
+#         if not estado_requerimiento:
+#             return jsonify({"msg":"estado requerimiento is required"}), 422    
+
+#         requerimiento = Requerimiento()
+#         requerimiento.evento_id = evento_id
+#         requerimiento.item_id = item_id
+#         requerimiento.cantidad_requerida = cantidad_requerida
+#         requerimiento.cantidad_actual = cantidad_actual
+#         requerimiento.estado_requerimiento = estado_requerimiento
+
+#         db.session.add(requerimiento)
+#         db.session.commit()
+
+#         return jsonify(requerimiento.serialize()), 201
+
+#     if request.method == 'PUT':
+#         evento_id = request.json.get('evento_id', None)
+#         item_id = request.json.get('item_id', None)
+#         cantidad_requerida = request.json.get('cantidad_requerida', None)
+#         cantidad_actual = request.json.get('cantidad_actual', None)
+#         estado_requerimiento = request.json.get('estado_requerimiento', None)
+
+#         if not evento_id:
+#             return jsonify({"msg":"evento id is required"}), 422
+
+#         if not item_id:
+#             return jsonify({"msg":"item id is required"}), 422
+
+#         if not cantidad_requerida:
+#             return jsonify({"msg":"cantidad requerida is required"}), 422
+
+#         if not cantidad_actual:
+#             return jsonify({"msg":"cantidad actual is required"}), 422
+
+#         if not estado_requerimiento:
+#             return jsonify({"msg":"estado requerimiento is required"}), 422
+
+#         requerimiento = Requerimiento.query.get(( id_evento , id_item ))
+
+#         if not requerimiento:
+#                 return jsonify({"msg":"Requerimiento not found"}), 404
+
+#         requerimiento = Requerimiento()
+#         requerimiento.evento_id = evento_id
+#         requerimiento.item_id = item_id
+#         requerimiento.cantidad_requerida = cantidad_requerida
+#         requerimiento.cantidad_actual = cantidad_actual
+#         requerimiento.estado_requerimiento = estado_requerimiento
+
+#         db.session.commit()
+
+#         return jsonify(requerimiento.serialize()), 200
+
+#     if request.method == 'DELETE':
+
+#         requerimiento = Requerimiento.query.get(( id_evento , id_item ))
+
+#         if not requerimiento:
+#                 return jsonify({"msg":"Requerimiento not found"}), 404
+
+#         db.session.delete(requerimiento)
+#         db.session.commit()
+
+#         return jsonify({"msg":"Requerimiento deleted"}), 200
 
 if __name__=="__main__":
     manager.run()
