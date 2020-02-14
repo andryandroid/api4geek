@@ -134,18 +134,18 @@ class Imagen(db.Model):
 
 class Participante(db.Model):
     __tablename__ = 'participante'
-    requerimiento_id = db.Column ( db.Integer, db.ForeignKey('requerimiento.id'), primary_key=True)
     usuario_id = db.Column ( db.Integer, db.ForeignKey('usuario.id'), primary_key=True)
-    cantidad_Aportada = db.Column ( db.Integer, nullable=False)
+    requerimiento_id = db.Column ( db.Integer, db.ForeignKey('requerimiento.id'), primary_key=True)
+    cantidad_aportada = db.Column ( db.Integer, nullable=False)
     usuario = db.relationship("Usuario", back_populates="requerimientos")
     requerimiento = db.relationship("Requerimiento", back_populates="usuarios")
 
     def __repr__(self):
-        return "<Participante %r>" % self.cantidad_Aportada
+        return "<Participante %r>" % self.cantidad_aportada
 
     def serialize(self):
         return {
-            "id de requerimiento": self.evento_id,
-            "id de usuario": self.usuario_id,
-            "cantidad aportada": self.cantidad_Aportada
+            "requerimiento_id": self.requerimiento_id,
+            "usuario_id": self.usuario_id,
+            "cantidad_aportada": self.cantidad_aportada
         }

@@ -436,5 +436,87 @@ def requerimiento(id=None):
 
         return jsonify({"msg":"Requerimiento deleted"}), 200
 
+
+@app.route("/participante", methods=['GET', 'POST'])
+@app.route("/participante/<int:id_usuario>/<int:id_requerimiento>", methods=['GET', 'PUT', 'DELETE'])
+
+def participante(id_usuario=None, id_requerimiento = None):
+    if request.method == 'GET':
+        if id_usuario is not None and id_requerimiento is not None:
+            participante = Participante.query.get(( id_usuario , id_requerimiento ))
+            if participante:
+                return jsonify(participante.serialize()), 200
+            else:
+                return jsonify({"msg":"participante not found"}), 404
+        else:
+            participante = Participante.query.all()
+            participante = list(map(lambda participante: participante.serialize(), participante))
+            return jsonify(participante), 200
+
+    if request.method == 'POST':
+        
+        requerimiento_id = request.json.get('requerimiento_id', None)
+        usuario_id = request.json.get('usuario_id', None)
+        cantidad_aportada = request.json.get('cantidad_aportada', None)
+
+        if not requerimiento_id:
+            return jsonify({"msg":"requerimiento_id is required"}), 422
+
+        if not usuario_id:
+            return jsonify({"msg":"usuario_id is required"}), 422
+
+        if not cantidad_aportada:
+            return jsonify({"msg":"cantidad_aportada is required"}), 422
+
+        participante = Participante()
+        participante.requerimiento_id = requerimiento_id
+        participante.usuario_id = usuario_id
+        participante.cantidad_aportada = cantidad_aportada
+
+        db.session.add(participante)
+        db.session.commit()
+
+        return jsonify(participante.serialize()), 201
+
+    if request.method == 'PUT':
+        requerimiento_id = request.json.get('requerimiento_id', None)
+        usuario_id = request.json.get('usuario_id', None)
+        cantidad_aportada = request.json.get('cantidad_aportada', None)
+
+        if not requerimiento_id:
+            return jsonify({"msg":"requerimiento_id is required"}), 422
+
+        if not usuario_id:
+            return jsonify({"msg":"usuario_id is required"}), 422
+
+        if not cantidad_aportada:
+            return jsonify({"msg":"cantidad_aportada is required"}), 422
+        
+        participante = Participante.query.get(( id_usuario , id_requerimiento ))
+        
+        if not participante:
+                return jsonify({"msg":"participante not found"}), 404
+
+        participante.requerimiento_id = requerimiento_id
+        participante.usuario_id = usuario_id
+        participante.cantidad_aportada = cantidad_aportada
+
+        db.session.commit()
+
+        return jsonify(participante.serialize()), 200
+
+    if request.method == 'DELETE':
+
+        participante = Participante.query.get(( id_usuario , id_requerimiento ))
+
+        if not participante:
+                return jsonify({"msg":"participante not found"}), 404
+
+        db.session.delete(participante)
+        db.session.commit()
+
+        return jsonify({"msg":"Participante deleted"}), 200
+
+
 if __name__=="__main__":
     manager.run()
