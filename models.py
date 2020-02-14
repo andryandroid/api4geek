@@ -70,7 +70,7 @@ class Requerimiento(db.Model):
             "item_id": self.item_id,
             "cantidad_requerida": self.cantidad_requerida,
             "cantidad_actual": self.cantidad_actual, 
-            "estado del requerimiento": self.estado_requerimientos
+            "estado_requerimiento": self.estado_requerimiento
         }
 
 class Evento(db.Model):
@@ -136,7 +136,7 @@ class Participante(db.Model):
     __tablename__ = 'participante'
     requerimiento_id = db.Column ( db.Integer, db.ForeignKey('requerimiento.id'), primary_key=True)
     usuario_id = db.Column ( db.Integer, db.ForeignKey('usuario.id'), primary_key=True)
-    cantidad_Aportada = db.Column ( db.Integer,nullable=False)
+    cantidad_Aportada = db.Column ( db.Integer, nullable=False)
     usuario = db.relationship("Usuario", back_populates="requerimientos")
     requerimiento = db.relationship("Requerimiento", back_populates="usuarios")
 
@@ -145,7 +145,7 @@ class Participante(db.Model):
 
     def serialize(self):
         return {
-            "cantidad aportada": self.cantidad_Aportada,
             "id de requerimiento": self.evento_id,
-            "id de usuario": self.usuario_id
+            "id de usuario": self.usuario_id,
+            "cantidad aportada": self.cantidad_Aportada
         }
