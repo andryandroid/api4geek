@@ -77,10 +77,10 @@ class Evento(db.Model):
     descripcion = db.Column ( db.String(200),nullable=False)
     fecha_limite = db.Column ( db.String(50),nullable=False)
     estado_evento = db.Column (db.String(50))
-    imagen = db.Relationship("Imagen", uselist=False, back_populates="evento")
+    imagen = db.relationship("Imagen", uselist=False, back_populates="evento")
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))
     usuario = db.relationship("Usuario")
-    requerimientos = db.relationship("Evento_Requerimiento")  
+    requerimientos = db.relationship("Requerimiento")  
    
     def __repr__(self):
         return "<Evento %r>" % self.titulo
@@ -115,8 +115,8 @@ class Item(db.Model):
 class Imagen(db.Model):
     __tablename__ = 'imagen'
     id = db.Column ( db.Integer, primary_key=True)
-    evento = db.Relationship("Evento", back_populates="imagen")
-    evento_id = db.Column ( db.Integer, db.ForeignKey(evento.id))
+    evento = db.relationship("Evento", back_populates="imagen")
+    evento_id = db.Column ( db.Integer, db.ForeignKey('evento.id'))
     imagen_Evento = db.Column ( db.String(250),nullable=False)
      
 
@@ -131,14 +131,14 @@ class Imagen(db.Model):
         }
 
 class Participante(db.Model):
-    __tablename__ = 'Participante'
+    __tablename__ = 'participante'
     id = db.Column ( db.Integer, primary_key=True)
     item = db.relationship("Item", back_populates="item")
     evento = db.relationship("Evento", back_populates="evento")
     usuario = db.relationship("Usuario", back_populates="usuario")
-    item_id = db.Column ( db.Integer, db.ForeignKey(item.id), primary_key=True)
-    evento_id = db.Column ( db.Integer, db.ForeignKey(evento.id), primary_key=True)
-    usuario_id = db.Column ( db.Integer, db.ForeignKey(usuario.id), primary_key=True)
+    item_id = db.Column ( db.Integer, db.ForeignKey('item.id'), primary_key=True)
+    evento_id = db.Column ( db.Integer, db.ForeignKey('evento.id'), primary_key=True)
+    usuario_id = db.Column ( db.Integer, db.ForeignKey('usuario.id'), primary_key=True)
     cantidad_Aportada = db.Column ( db.Integer,nullable=False)
 
 
