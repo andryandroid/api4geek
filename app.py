@@ -450,5 +450,26 @@ def participante(id_usuario=None, id_requerimiento = None):
         return jsonify({"msg":"Participante deleted"}), 200
 
 
+@app.route("/login", methods=['GET', 'POST'])
+def login(correo=None):
+    if request.method == 'POST':
+        correo = request.json.get('correo', None)
+        contrasena = request.json.get('contrasena', None)
+
+        if not correo:
+            return jsonify({"msg":"correo is required"}), 422
+
+        if not contrasena:
+            return jsonify({"msg":"contrasena is required"}), 422
+
+        login = Usuario.query.filter_by(correo=correo).first()
+        if login:
+            if login.contrasena != contrasena:
+                return jsonify({"msg":"contrasena incorrecta"}), 404
+            else:    
+                return jsonify(login.serialize()), 200
+        else:
+            return jsonify({"msg":"User not found"}), 404
+
 if __name__=="__main__":
     manager.run()
