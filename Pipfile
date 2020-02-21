@@ -12,6 +12,7 @@ flask-sqlalchemy = "*"
 flask-script = "*"
 flask-migrate = "*"
 flask-cors = "*"
+cors = "*"
 
 [requires]
 python_version = "3.6"

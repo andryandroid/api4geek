@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify, render_template
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from models import db, Contact, Usuario, Evento, Participante, Imagen, Item, Requerimiento
+from flask_cors import CORS
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -11,6 +12,7 @@ app.config['DEBUG']= True
 app.config['ENV']= 'development'
 app.config['SQLALCHEMY_DATABASE_URI']= 'sqlite:///'+ os.path.join(BASE_DIR, 'database.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']= False
+CORS(app)
 
 db.init_app(app)
 
@@ -19,10 +21,9 @@ Migrate(app, db)
 manager = Manager(app)
 manager.add_command("db", MigrateCommand)
 
-
-
 @app.route("/")
 def home():
+    
     return render_template("index.html")
 
 @app.route("/contacts", methods=['GET', 'POST'])
@@ -152,7 +153,6 @@ def usuario(id=None):
 
         return jsonify(usuario.serialize()), 201
 
-
     if request.method == 'PUT':
         nombre = request.json.get('nombre', None)
         apellido = request.json.get('apellido', None)
@@ -172,20 +172,11 @@ def usuario(id=None):
         if not correo:
             return jsonify({"msg":"email is required"}), 422
 
-        if not ubicacion:
-            return jsonify({"msg":"location is required"}), 422
-
-        if not descripcion:
-            return jsonify({"msg":"description is required"}), 422
-
         if not contrasena:
             return jsonify({"msg":"password is required"}), 422
 
         if not nombre_usuario:
-            return jsonify({"msg":"user name is required"}), 422    
-        
-        if not imagen_perfil:
-            return jsonify({"msg":"profile image is required"}), 422
+            return jsonify({"msg":"user name is required"}), 422
 
         usuario = Usuario.query.get(id)
 
@@ -272,7 +263,6 @@ def evento(id=None):
             return jsonify({"msg":"deadline is required"}), 422
         if not estado_evento:
             return jsonify({"msg":"event status is required"}), 422    
-        
         if not usuario_id:
             return jsonify({"msg":"user id is required"}), 422
         evento = Evento.query.get(id)
@@ -348,6 +338,187 @@ def item(id=None):
         db.session.commit()
         return jsonify({"msg":"item deleted"}), 200
 
+
+@app.route("/requerimiento", methods=['GET', 'POST'])
+@app.route("/requerimiento/<int:id>", methods=['GET', 'PUT', 'DELETE'])
+
+def requerimiento(id=None):
+    if request.method == 'GET':
+        if id is not None:
+            requerimiento = Requerimiento.query.get(id)
+            if requerimiento:
+                return jsonify(requerimiento.serialize()), 200
+            else:
+                return jsonify({"msg":"Requerimiento not found"}), 404
+        else:
+            requerimiento = Requerimiento.query.all()
+            requerimiento = list(map(lambda requerimiento: requerimiento.serialize(), requerimiento))
+            return jsonify(requerimiento), 200
+
+    if request.method == 'POST':
+        evento_id = request.json.get('evento_id', None)
+        item_id = request.json.get('item_id', None)
+        cantidad_requerida = request.json.get('cantidad_requerida', None)
+        cantidad_actual = request.json.get('cantidad_actual', None)
+        estado_requerimiento = request.json.get('estado_requerimiento', None)
+
+        if not evento_id:
+            return jsonify({"msg":"evento_id is required"}), 422
+
+        if not item_id:
+            return jsonify({"msg":"item_id is required"}), 422
+
+        if not cantidad_requerida:
+            return jsonify({"msg":"cantidad requerida is required"}), 422
+
+        if not cantidad_actual:
+            return jsonify({"msg":"cantidad actual is required"}), 422
+
+        if not estado_requerimiento:
+            return jsonify({"msg":"estado requerimiento is required"}), 422    
+
+        requerimiento = Requerimiento()
+        requerimiento.evento_id = evento_id
+        requerimiento.item_id = item_id
+        requerimiento.cantidad_requerida = cantidad_requerida
+        requerimiento.cantidad_actual = cantidad_actual
+        requerimiento.estado_requerimiento = estado_requerimiento
+
+        db.session.add(requerimiento)
+        db.session.commit()
+
+        return jsonify(requerimiento.serialize()), 201
+
+    if request.method == 'PUT':
+        evento_id = request.json.get('evento_id', None)
+        item_id = request.json.get('item_id', None)
+        cantidad_requerida = request.json.get('cantidad_requerida', None)
+        cantidad_actual = request.json.get('cantidad_actual', None)
+        estado_requerimiento = request.json.get('estado_requerimiento', None)
+
+        if not evento_id:
+            return jsonify({"msg":"evento id is required"}), 422
+
+        if not item_id:
+            return jsonify({"msg":"item id is required"}), 422
+
+        if not cantidad_requerida:
+            return jsonify({"msg":"cantidad requerida is required"}), 422
+
+        if not cantidad_actual:
+            return jsonify({"msg":"cantidad actual is required"}), 422
+
+        if not estado_requerimiento:
+            return jsonify({"msg":"estado requerimiento is required"}), 422
+
+        requerimiento = Requerimiento.query.get(id)
+
+        if not requerimiento:
+                return jsonify({"msg":"Requerimiento not found"}), 404
+
+        requerimiento.evento_id = evento_id
+        requerimiento.item_id = item_id
+        requerimiento.cantidad_requerida = cantidad_requerida
+        requerimiento.cantidad_actual = cantidad_actual
+        requerimiento.estado_requerimiento = estado_requerimiento
+
+        db.session.commit()
+
+        return jsonify(requerimiento.serialize()), 200
+
+    if request.method == 'DELETE':
+
+        requerimiento = Requerimiento.query.get(id)
+
+        if not requerimiento:
+                return jsonify({"msg":"Requerimiento not found"}), 404
+
+        db.session.delete(requerimiento)
+        db.session.commit()
+
+        return jsonify({"msg":"Requerimiento deleted"}), 200
+
+
+@app.route("/participante", methods=['GET', 'POST'])
+@app.route("/participante/<int:id_usuario>/<int:id_requerimiento>", methods=['GET', 'PUT', 'DELETE'])
+
+def participante(id_usuario=None, id_requerimiento = None):
+    if request.method == 'GET':
+        if id_usuario is not None and id_requerimiento is not None:
+            participante = Participante.query.get(( id_usuario , id_requerimiento ))
+            if participante:
+                return jsonify(participante.serialize()), 200
+            else:
+                return jsonify({"msg":"participante not found"}), 404
+        else:
+            participante = Participante.query.all()
+            participante = list(map(lambda participante: participante.serialize(), participante))
+            return jsonify(participante), 200
+
+    if request.method == 'POST':
+        
+        requerimiento_id = request.json.get('requerimiento_id', None)
+        usuario_id = request.json.get('usuario_id', None)
+        cantidad_aportada = request.json.get('cantidad_aportada', None)
+
+        if not requerimiento_id:
+            return jsonify({"msg":"requerimiento_id is required"}), 422
+
+        if not usuario_id:
+            return jsonify({"msg":"usuario_id is required"}), 422
+
+        if not cantidad_aportada:
+            return jsonify({"msg":"cantidad_aportada is required"}), 422
+
+        participante = Participante()
+        participante.requerimiento_id = requerimiento_id
+        participante.usuario_id = usuario_id
+        participante.cantidad_aportada = cantidad_aportada
+
+        db.session.add(participante)
+        db.session.commit()
+
+        return jsonify(participante.serialize()), 201
+
+    if request.method == 'PUT':
+        requerimiento_id = request.json.get('requerimiento_id', None)
+        usuario_id = request.json.get('usuario_id', None)
+        cantidad_aportada = request.json.get('cantidad_aportada', None)
+
+        if not requerimiento_id:
+            return jsonify({"msg":"requerimiento_id is required"}), 422
+
+        if not usuario_id:
+            return jsonify({"msg":"usuario_id is required"}), 422
+
+        if not cantidad_aportada:
+            return jsonify({"msg":"cantidad_aportada is required"}), 422
+        
+        participante = Participante.query.get(( id_usuario , id_requerimiento ))
+        
+        if not participante:
+                return jsonify({"msg":"participante not found"}), 404
+
+        participante.requerimiento_id = requerimiento_id
+        participante.usuario_id = usuario_id
+        participante.cantidad_aportada = cantidad_aportada
+
+        db.session.commit()
+
+        return jsonify(participante.serialize()), 200
+
+    if request.method == 'DELETE':
+
+        participante = Participante.query.get(( id_usuario , id_requerimiento ))
+
+        if not participante:
+                return jsonify({"msg":"participante not found"}), 404
+
+        db.session.delete(participante)
+        db.session.commit()
+
+        return jsonify({"msg":"Participante deleted"}), 200
+
 @app.route("/imagen", methods=['GET', 'POST'])
 @app.route("/imagen/<int:id>", methods=['GET', 'PUT', 'DELETE'])
 def imagen(id=None):
@@ -363,37 +534,27 @@ def imagen(id=None):
             imagen = list(map(lambda imagen: imagen.serialize(), imagen))
             return jsonify(imagen), 200
     if request.method == 'POST':
-        evento_id = request.json.get('id de evento', None)
         imagen_Evento = request.json.get('imagen de evento', None)
        
-        if not evento_id:
-            return jsonify({"msg":"event id is required"}), 422
         if not imagen_Evento:
-            return jsonify({"msg":"image is required"}), 422
+            return jsonify({"msg":"event image is required"}), 422
          
         imagen = Imagen()
-        imagen.evento_id = evento_id
         imagen.imagen_Evento = imagen_Evento
         
         db.session.add(imagen)
         db.session.commit()
         return jsonify(imagen.serialize()), 201
     if request.method == 'PUT':
-        evento_id = request.json.get('id de evento', None)
         imagen_Evento = request.json.get('imagen de evento', None)
      
-        if not evento_id:
-            return jsonify({"msg":"event id is required"}), 422
         if not imagen_Evento:
-            return jsonify({"msg":"imagen is required"}), 422
+            return jsonify({"msg":"event image is required"}), 422
         
         imagen = Imagen.query.get(id)
-
         if not imagen:
-                return jsonify({"msg":"imagen not found"}), 404
-
-        imagen.evento_id = evento_id
-        imagen.imagen_Evento = imagen_Evento   
+                return jsonify({"msg":"image not found"}), 404
+        item.imagen_Evento = imagen_Evento
         
         db.session.commit()
         return jsonify(imagen.serialize()), 200
@@ -405,77 +566,6 @@ def imagen(id=None):
         db.session.commit()
         return jsonify({"msg":"image deleted"}), 200
 
-@app.route("/participante", methods=['GET', 'POST'])
-@app.route("/participante/<int:id>", methods=['GET', 'PUT', 'DELETE'])
-def participante(id=None):
-    if request.method == 'GET':
-        if id is not None:
-            participante = Participante.query.get(id)
-            if participante:
-                return jsonify(participante.serialize()), 200
-            else:
-                return jsonify({"msg":"partaker not found"}), 404
-        else:
-            participante = Participante.query.all()
-            participante = list(map(lambda participante: participante.serialize(), participante))
-            return jsonify(participante), 200
-    if request.method == 'POST':
-        item_id = request.json.get('id de item', None)
-        evento_id = request.json.get('id de evento', None)
-        usuario_id = request.json.get('id de usuario', None)
-        cantidad_Aportada = request.json.get('cantidad aportada', None)
-       
-        if not evento_id:
-            return jsonify({"msg":"event id is required"}), 422
-        if not item_id:
-            return jsonify({"msg":"item id is required"}), 422
-        if not usuario_id:
-            return jsonify({"msg":"user id is required"}), 422
-        if not cantidad_Aportada:
-            return jsonify({"msg":"contribution quantity is required"}), 422
-         
-        participante = Participante()
-        participante.evento_id = evento_id
-        participante.item_id = item_id
-        participante.usuario_id = usuario_id
-        participante.cantidad_Aportada = cantidad_Aportada
-        
-        db.session.add(participante)
-        db.session.commit()
-        return jsonify(participante.serialize()), 201
-    if request.method == 'PUT':
-        usuario_id = request.json.get('id de item', None)
-        item_id = request.json.get('id de usuario', None)
-        evento_id = request.json.get('id de evento', None)
-        cantidad_Aportada = request.json.get('cantidad aportada', None)
-
-     
-        if not evento_id:
-            return jsonify({"msg":"event id is required"}), 422
-        if not usuario_id:
-            return jsonify({"msg":"user id is required"}), 422
-        if not item_id:
-            return jsonify({"msg":"item id is required"}), 422
-        if not cantidad_Aportada:
-            return jsonify({"msg":"contribution quantity is required"}), 422
-        
-        participante = Participante.query.get(id)
-        if not participante:
-                return jsonify({"msg":"partaker not found"}), 404
-        participante.evento_id = evento_id
-        participante.cantidad_Aportada = cantidad_Aportada
-        participante.usuario_id = usuario_id
-        participante.item_id = item_id   
-        
-        db.session.commit()
-        return jsonify(participante.serialize()), 200
-    if request.method == 'DELETE':
-        participante = Participante.query.get(id)
-        if not participante:
-                return jsonify({"msg":"partaker not found"}), 404
-        db.session.delete(participante)
-        db.session.commit()
-        return jsonify({"msg":"partaker deleted"}), 200
 
 if __name__=="__main__":
     manager.run()
