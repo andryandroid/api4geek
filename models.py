@@ -11,7 +11,7 @@ class Usuario(db.Model):
     ubicacion = db.Column (db.String(50))
     descripcion = db.Column (db.String(200))
     contrasena = db.Column (db.String(50), nullable=False)
-    nombre_usuario = db.Column (db.String(50), nullable=False, unique=True)
+    nombre_usuario = db.Column (db.String(50), nullable=False)
     imagen_perfil = db.Column (db.String(100))
     eventos = db.relationship("Evento", back_populates="usuario")
     requerimientos = db.relationship("Participante", back_populates="usuario")
