@@ -1,24 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy_imageattach.entity import Image, image_attachment
 
 db = SQLAlchemy()
-
-class Contact(db.Model):
-    __tablename__ = 'contacts'
-    id = db.Column ( db.Integer, primary_key=True)
-    name = db.Column ( db.String(50), nullable = False)
-    phone = db.Column ( db.String(50),nullable=False)
-
-    def __repr__(self):
-        return "<Contact %r>" % self.name
-
-    def serialize(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "phone": self.phone
-        }
-
 
 class Usuario(db.Model):
     __tablename__ = 'usuario'
@@ -29,7 +11,7 @@ class Usuario(db.Model):
     ubicacion = db.Column (db.String(50))
     descripcion = db.Column (db.String(200))
     contrasena = db.Column (db.String(50), nullable=False)
-    nombre_usuario = db.Column (db.String(50), nullable=False)
+    nombre_usuario = db.Column (db.String(50), nullable=False, unique=True)
     imagen_perfil = db.Column (db.String(100))
     eventos = db.relationship("Evento", back_populates="usuario")
     requerimientos = db.relationship("Participante", back_populates="usuario")
@@ -120,7 +102,7 @@ class Imagen(db.Model):
     id = db.Column ( db.Integer, primary_key=True)
     evento = db.relationship("Evento", back_populates="imagen")
     evento_id = db.Column ( db.Integer, db.ForeignKey('evento.id'))
-    imagen_Evento = image_attachment('imagen de evento', nullable=False)
+    imagen_Evento = db.Column(db.LargeBinary, 'imagen de evento')
      
 
     def __repr__(self):
