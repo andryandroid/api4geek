@@ -102,7 +102,7 @@ class Imagen(db.Model):
     id = db.Column ( db.Integer, primary_key=True)
     evento = db.relationship("Evento", back_populates="imagen")
     evento_id = db.Column ( db.Integer, db.ForeignKey('evento.id'))
-    imagen_Evento = db.Column(db.LargeBinary, 'imagen de evento')
+    imagen_Evento = db.Column ( db.LargeBinary, nullable=False)
      
 
     def __repr__(self):

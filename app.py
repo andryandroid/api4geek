@@ -464,13 +464,13 @@ def imagen(id=None):
             imagen = list(map(lambda imagen: imagen.serialize(), imagen))
             return jsonify(imagen), 200
     if request.method == 'POST':
-        imagen_Evento = request.json.get('imagen de evento', None)
-       
-        if not imagen_Evento:
+        file = request.json.get('imagen de evento', None)
+        
+        if not file:
             return jsonify({"msg":"event image is required"}), 422
          
-        imagen = Imagen()
-        imagen.imagen_Evento = imagen_Evento
+        imagen = Imagen(imagen_Evento=file.read())
+        imagen.imagen_Evento = file
         
         db.session.add(imagen)
         db.session.commit()
