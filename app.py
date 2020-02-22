@@ -67,6 +67,14 @@ def usuario(id=None):
         if not nombre_usuario:
             return jsonify({"msg":"user name is required"}), 422    
 
+        usuario = Usuario.query.filter_by(correo=correo).first()
+        if usuario:
+            return jsonify({"msg":"correo electronico no disponible"}), 422
+        
+        usuario = Usuario.query.filter_by(nombre_usuario=nombre_usuario).first()
+        if usuario:    
+            return jsonify({"msg":"Nombre de Usuario no disponible"}), 422
+
         usuario = Usuario()
         usuario.nombre = nombre
         usuario.apellido = apellido
