@@ -4,6 +4,8 @@ from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from models import db, Usuario, Evento, Participante, Imagen, Item, Requerimiento
 from flask_cors import CORS
+from flask_uploads import UploadSet, configure_uploads, IMAGES #libreria para cargar imagenes
+
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -12,7 +14,11 @@ app.config['DEBUG']= True
 app.config['ENV']= 'development'
 app.config['SQLALCHEMY_DATABASE_URI']= 'sqlite:///'+ os.path.join(BASE_DIR, 'database.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']= False
+app.config['UPLOADED_PHOTOS_DEST']= '/img' #carpeta de destino de imagenes subidas
 CORS(app)
+
+photos = UploadSet('photos', IMAGES) #configuracion de flask_uploads
+configure_uploads(app, photos) #configuracion de flask_uploads
 
 db.init_app(app)
 
@@ -472,13 +478,13 @@ def imagen(id=None):
             imagen = list(map(lambda imagen: imagen.serialize(), imagen))
             return jsonify(imagen), 200
     if request.method == 'POST':
-        file = request.json.get('imagen de evento', None)
+        imagen_Evento = request.json.get('imagen de evento', None)
         
-        if not file:
+        if not imagen_Evento:
             return jsonify({"msg":"event image is required"}), 422
          
-        imagen = Imagen(imagen_Evento=file.read())
-        imagen.imagen_Evento = file
+        imagen = Imagen()
+        imagen.imagen_Evento = imagen_Evento
         
         db.session.add(imagen)
         db.session.commit()
@@ -524,7 +530,24 @@ def login(correo=None):
             else:    
                 return jsonify(login.serialize()), 200
         else:
-            return jsonify({"msg":"User not found"}), 404
+            return jsonify({"msg":"User not found"}), 404\
+
+
+@app.route("/upload", methods=['GET', 'POST'])
+def upload():
+    if request.method == 'POST' and 'photo' in request.files:
+        photos = request.json.get('photo', None)
+        filename= photos.save(request.files['photo'])
+        if not photos:
+            return jsonify({"msg":"image file is required"}), 422
+
+        photos = Imagen()
+        imagen.imagen_Evento = filename
+                
+        db.session.add(photos)
+        db.session.commit()
+        return jsonify(imagen.serialize()), 201
+        
 
 if __name__=="__main__":
     manager.run()
