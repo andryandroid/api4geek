@@ -4,6 +4,8 @@ from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from models import db, Usuario, Evento, Participante, Imagen, Item, Requerimiento
 from flask_cors import CORS
+from flask_uploads import UploadSet, configure_uploads, IMAGES #libreria para cargar imagenes
+
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -12,7 +14,11 @@ app.config['DEBUG']= True
 app.config['ENV']= 'development'
 app.config['SQLALCHEMY_DATABASE_URI']= 'sqlite:///'+ os.path.join(BASE_DIR, 'database.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']= False
+app.config['UPLOADED_PHOTOS_DEST']= '/img' #carpeta de destino de imagenes subidas
 CORS(app)
+
+photos = UploadSet('photos', IMAGES) #configuracion de flask_uploads
+configure_uploads(app, photos) #configuracion de flask_uploads
 
 db.init_app(app)
 
@@ -457,6 +463,53 @@ def participante(id_usuario=None, id_requerimiento = None):
 
         return jsonify({"msg":"Participante deleted"}), 200
 
+@app.route("/imagen", methods=['GET', 'POST'])
+@app.route("/imagen/<int:id>/<int:id_evento>", methods=['GET', 'PUT', 'DELETE'])
+def imagen(id=None):
+    if request.method == 'GET':
+        if id is not None:
+            imagen = Imagen.query.get(id)
+            if imagen:
+                return jsonify(imagen.serialize()), 200
+            else:
+                return jsonify({"msg":"image not found"}), 404
+        else:
+            imagen = Imagen.query.all()
+            imagen = list(map(lambda imagen: imagen.serialize(), imagen))
+            return jsonify(imagen), 200
+    if request.method == 'POST':
+        imagen_Evento = request.json.get('imagen de evento', None)
+        
+        if not imagen_Evento:
+            return jsonify({"msg":"event image is required"}), 422
+         
+        imagen = Imagen()
+        imagen.imagen_Evento = imagen_Evento
+        
+        db.session.add(imagen)
+        db.session.commit()
+        return jsonify(imagen.serialize()), 201
+    if request.method == 'PUT':
+        imagen_Evento = request.json.get('imagen de evento', None)
+     
+        if not imagen_Evento:
+            return jsonify({"msg":"event image is required"}), 422
+        
+        imagen = Imagen.query.get(id)
+        if not imagen:
+                return jsonify({"msg":"image not found"}), 404
+        item.imagen_Evento = imagen_Evento
+        
+        db.session.commit()
+        return jsonify(imagen.serialize()), 200
+    if request.method == 'DELETE':
+        imagen = Imagen.query.get(id)
+        if not imagen:
+                return jsonify({"msg":"image not found"}), 404
+        db.session.delete(imagen)
+        db.session.commit()
+        return jsonify({"msg":"image deleted"}), 200
+
 
 @app.route("/login", methods=['GET', 'POST'])
 def login(correo=None):
@@ -477,7 +530,24 @@ def login(correo=None):
             else:    
                 return jsonify(login.serialize()), 200
         else:
-            return jsonify({"msg":"User not found"}), 404
+            return jsonify({"msg":"User not found"}), 404\
+
+
+@app.route("/upload", methods=['GET', 'POST'])
+def upload():
+    if request.method == 'POST' and 'photo' in request.files:
+        photos = request.json.get('photo', None)
+        filename= photos.save(request.files['photo'])
+        if not photos:
+            return jsonify({"msg":"image file is required"}), 422
+
+        photos = Imagen()
+        imagen.imagen_Evento = filename
+                
+        db.session.add(photos)
+        db.session.commit()
+        return jsonify(imagen.serialize()), 201
+        
 
 if __name__=="__main__":
     manager.run()
