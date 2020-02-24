@@ -7,7 +7,7 @@ class Usuario(db.Model):
     id = db.Column ( db.Integer, primary_key=True)
     nombre = db.Column ( db.String(50), nullable = False)
     apellido = db.Column ( db.String(50),nullable=False)
-    correo = db.Column ( db.String(50),nullable=False, unique=True )
+    correo = db.Column ( db.String(50),nullable=False, unique=True)
     ubicacion = db.Column (db.String(50))
     descripcion = db.Column (db.String(200))
     contrasena = db.Column (db.String(50), nullable=False)
@@ -102,7 +102,7 @@ class Imagen(db.Model):
     id = db.Column ( db.Integer, primary_key=True)
     evento = db.relationship("Evento", back_populates="imagen")
     evento_id = db.Column ( db.Integer, db.ForeignKey('evento.id'))
-    imagen_Evento = db.Column ( db.String(250),nullable=False)
+    imagen_Evento = db.Column ( db.LargeBinary, nullable=False)
      
 
     def __repr__(self):
