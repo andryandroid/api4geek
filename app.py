@@ -250,8 +250,6 @@ def item(id=None):
        
         if not nombre:
             return jsonify({"msg":"name is required"}), 422
-        if not descripcion:
-            return jsonify({"msg":"description is required"}), 422
          
         item = Item()
         item.nombre = nombre
@@ -266,8 +264,6 @@ def item(id=None):
      
         if not nombre:
             return jsonify({"msg":"name is required"}), 422
-        if not descripcion:
-            return jsonify({"msg":"description is required"}), 422
         
         item = Item.query.get(id)
         if not item:
