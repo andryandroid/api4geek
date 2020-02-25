@@ -100,6 +100,7 @@ class Item(db.Model):
 class Imagen(db.Model):
     __tablename__ = 'imagen'
     id = db.Column ( db.Integer, primary_key=True)
+    nombreImagen = ( db.String(300))
     evento = db.relationship("Evento", back_populates="imagen")
     evento_id = db.Column ( db.Integer, db.ForeignKey('evento.id'))
     imagen_Evento = db.Column ( db.LargeBinary, nullable=False)
@@ -112,7 +113,8 @@ class Imagen(db.Model):
         return {
             "id": self.id,
             "imagen de evento": self.imagen_Evento,
-            "id de evento": self.evento_id
+            "id de evento": self.evento_id,
+            "nombre de imagen": self.nombreImagen
         }
 
 class Participante(db.Model):
