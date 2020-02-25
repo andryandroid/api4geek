@@ -1,11 +1,13 @@
 import os
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, flash, redirect, url_for, send_from_directory
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 from models import db, Usuario, Evento, Participante, Imagen, Item, Requerimiento
 from flask_cors import CORS
-from flask_uploads import UploadSet, configure_uploads, IMAGES #libreria para cargar imagenes
-
+from werkzeug.utils import secure_filename
+#from flask_uploads import UploadSet, configure_uploads, IMAGES #libreria para cargar imagenes
+UPLOAD_FOLDER = '/../Desktop/api4geek/img/upload'
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -14,11 +16,12 @@ app.config['DEBUG']= True
 app.config['ENV']= 'development'
 app.config['SQLALCHEMY_DATABASE_URI']= 'sqlite:///'+ os.path.join(BASE_DIR, 'database.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']= False
-app.config['UPLOADED_PHOTOS_DEST']= '/img' #carpeta de destino de imagenes subidas
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+#app.config['UPLOADED_PHOTOS_DEST']= '/img' #carpeta de destino de imagenes subidas
 CORS(app)
 
-photos = UploadSet('photos', IMAGES) #configuracion de flask_uploads
-configure_uploads(app, photos) #configuracion de flask_uploads
+#photos = UploadSet('photos', IMAGES) #configuracion de flask_uploads
+#configure_uploads(app, photos) #configuracion de flask_uploads
 
 db.init_app(app)
 
@@ -532,21 +535,36 @@ def login(correo=None):
         else:
             return jsonify({"msg":"User not found"}), 404\
 
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route("/upload", methods=['GET', 'POST'])
 def upload():
-    if request.method == 'POST' and 'photo' in request.files:
-        photos = request.json.get('photo', None)
-        filename= photos.save(request.files['photo'])
-        if not photos:
-            return jsonify({"msg":"image file is required"}), 422
+    if request.method == 'POST':
+        if 'photo' not in request.files:
+            flash('No image file part'), 422
+            return redirect(request.url)
+        
+        file = request.files['photo']
+        
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
 
-        photos = Imagen()
-        imagen.imagen_Evento = filename
-                
-        db.session.add(photos)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            return redirect(url_for('uploaded_file', filename=filename))
+
+        newFile = Imagen(nombreImagen=file.filename, imagen_Evento=file)        
+        db.session.add(newFile)
         db.session.commit()
-        return jsonify(imagen.serialize()), 201
+        return jsonify(file.serialize()), 201
+
+@app.route('/upload/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
         
 
 if __name__=="__main__":
