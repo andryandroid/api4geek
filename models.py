@@ -85,7 +85,7 @@ class Item(db.Model):
     __tablename__ = 'item'
     id = db.Column ( db.Integer, primary_key=True)
     nombre = db.Column ( db.String(50), nullable = False)
-    descripcion = db.Column ( db.String(50),nullable=False)
+    descripcion = db.Column ( db.String(50))
 
     def __repr__(self):
         return "<Item %r>" % self.nombre
